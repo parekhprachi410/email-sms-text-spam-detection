@@ -1,5 +1,48 @@
 import streamlit as st
 import joblib
+import os
+import pandas as pd
+
+if not os.path.exists("spam_model.pkl"):
+
+    from sklearn.pipeline import Pipeline
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.naive_bayes import MultinomialNB
+
+    df = pd.read_csv("spam.csv",encoding='latin-1')
+
+    df=df[['Category','Message']]
+
+    df['Category']=df['Category'].map({
+        'ham':0,
+        'spam':1
+    })
+
+    model=Pipeline([
+
+        ('tfidf',
+         TfidfVectorizer(
+             stop_words='english'
+         )),
+
+        ('clf',
+         MultinomialNB())
+
+    ])
+
+    model.fit(
+        df['Message'],
+        df['Category']
+    )
+
+    joblib.dump(
+        model,
+        "spam_model.pkl"
+    )
+
+model=joblib.load(
+    "spam_model.pkl"
+)
 
 # LOAD MODEL
 model = joblib.load(
